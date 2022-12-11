@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect } from "react";
+import "./App.css";
+import { getAllPokemon } from "./utils/pokemon";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const initialURL = "https://pokeapi.co/api/v2/pokemon";
+
+  useEffect(() => {
+    const fetchPokemoData = async () => {
+      //すべてのポケモンデータを取得
+      let res = await getAllPokemon(initialURL);
+      console.log(res);
+    };
+    fetchPokemoData();
+  }, []);
+
+  return <div className="App"></div>;
 }
 
 export default App;
