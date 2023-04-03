@@ -1,45 +1,56 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-import Card from "./components/Card/Card";
+import Card, { Pokemon } from "./components/Card/Card";
 import Navbar from "./components/Navbar/Navbar";
-import { getAllPokemon, getPokemon } from "./utils/pokemon";
+import { Url, getAllPokemon, getPokemon } from "./utils/pokemon";
 
-function App() {
+type Result = {
+  name: string;
+  url: Url;
+};
+
+type Res = {
+  next: Url;
+  previous: Url;
+  results: Result[];
+};
+
+const App = () => {
   const initialURL = "https://pokeapi.co/api/v2/pokemon";
-  const [nextURL, setNextURL] = useState("");
-  const [prevURL, setPrevURL] = useState("");
+  const [nextURL, setNextURL] = useState<Url>();
+  const [prevURL, setPrevURL] = useState<Url>();
   const [loading, setLoading] = useState(true);
-  const [pokemonData, setPokemonData] = useState([]);
+  const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
 
   useEffect(() => {
     const fetchPokemoData = async () => {
       //すべてのポケモンデータを取得
-      let res = await getAllPokemon(initialURL);
+      let res = (await getAllPokemon(initialURL)) as Res;
       //各ポケモンの詳細なデータを取得
       loadPokemon(res.results);
-      // console.log(res);
+      //URLを取得
       setNextURL(res.next);
       setLoading(false);
     };
     fetchPokemoData();
   }, []);
 
-  const loadPokemon = async (data) => {
+  const loadPokemon = async (data: Result[]) => {
     let _pokemonData = await Promise.all(
-      data.map((pokemon) => {
-        // console.log(pokemon);
+      data.map((pokemon: Result) => {
         let pokemonRecord = getPokemon(pokemon.url);
         return pokemonRecord;
-      })
-    );
+      }),
+    ) as Pokemon[];
     setPokemonData(_pokemonData);
   };
 
   // console.log(pokemonData);
   const handleNextPage = async () => {
-    setLoading("true");
-    let data = await getAllPokemon(nextURL);
+    if (!nextURL) return;
+    setLoading(true);
+    let data = await getAllPokemon(nextURL) as Res;
     await loadPokemon(data.results);
     setNextURL(data.next);
     setPrevURL(data.previous);
@@ -47,8 +58,8 @@ function App() {
   };
   const handlePrevPage = async () => {
     if (!prevURL) return;
-    setLoading("true");
-    let data = await getAllPokemon(prevURL);
+    setLoading(true);
+    let data = await getAllPokemon(prevURL) as Res;
     await loadPokemon(data.results);
     setNextURL(data.next);
     setPrevURL(data.previous);
@@ -77,6 +88,6 @@ function App() {
       </div>
     </>
   );
-}
+};
 
 export default App;
